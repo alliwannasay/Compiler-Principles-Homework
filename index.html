@@ -478,7 +478,15 @@ pre[class*="language-"] {
 * 报告语法错误
 * 产生源程序的语法分析结果, 以语法分析树或与之等价的形式体现出来</code></pre></div>
 
-<h3 id="toc_3">2. 推导</h3>
+<h3 id="toc_3">2. 自顶向下分析思想</h3>
+
+<div><pre><code class="language-none">* 从文法开始符号出发进行推导;每一步推导都获得文法的一个句型;
+  直到产生出一个句子,恰好是所期望的终结符串
+* 每一步推导是对当前句型中剩余的某个非终结符进行扩展,
+  即用该非终结符的一个产生式的右部替换该非终结符
+* 如果不存在任何一个可以产生出所期望的终结符串的推导,则表明存在语法错误</code></pre></div>
+
+<h3 id="toc_4">2. 推导</h3>
 
 <div><pre><code class="language-none">    S -&gt; a | &amp; | (T) 
     T -&gt; T,S | S
@@ -494,26 +502,26 @@ pre[class*="language-"] {
     =&gt;(((a,a),&amp;,(T)),S)=&gt;(((a,a),&amp;,(S)),S)=&gt;(((a,a),&amp;,(a)),S)
     =&gt;(((a,a),&amp;,(a)),a)</code></pre></div>
 
-<h3 id="toc_4">3. 判断LL(1)文法</h3>
+<h3 id="toc_5">3. 判断LL(1)文法</h3>
 
-<h4 id="toc_5">(1)</h4>
+<h4 id="toc_6">(1)</h4>
 
 <div><pre><code class="language-none">    S -&gt; AB | PQx
     A -&gt; xy
     B -&gt; bc
     P -&gt; dP | ε
     Q -&gt; aQ | ε
-    First(A) = {x,y}
+    First(A) = {x}
     First(Q) = {a, ε}
     First(P) = {d, ε}
-    First(B) = {b,c}
-    First(S) = {x,y,a,d,x}
-    First(AB) = {x,y}
+    First(B) = {b}
+    First(S) = {x,a,d}
+    First(AB) = {x}
     First(PQx) = {a,d,x}
     First(AB)∩First(PQx) != ∅
     故该文法不是LL(1)文法</code></pre></div>
 
-<h4 id="toc_6">(2)</h4>
+<h4 id="toc_7">(2)</h4>
 
 <div><pre><code class="language-none">    S -&gt; TP
     T -&gt; +PT | ε 
@@ -528,24 +536,24 @@ pre[class*="language-"] {
     First((S))∩First(a) = ∅
 
     Follow(S) = {#,)}
-    Follow(P) = {#,(,a}
+    Follow(P) = {+,#,),(,a}
     Follow(T) = {(,a}
     First(+PT)∩Follow(T) = ∅
     综上所述，该文法是LL(1)文法</code></pre></div>
 
-<h3 id="toc_7">4. 验证如下文法是LL(1)文法。若是，则请构造递归下降分析程序</h3>
+<h3 id="toc_8">4. 验证如下文法是LL(1)文法。若是，则请构造递归下降分析程序</h3>
 
-<h4 id="toc_8">(1)</h4>
+<h4 id="toc_9">(1)</h4>
 
 <div><pre><code class="language-none">    E -&gt; Aa | Bb
     A -&gt; cA | eB
     B -&gt; bd
 
-    First(B) = {b,d}
+    First(B) = {b}
     First(A) = {c,e}
-    First(E) = {c,e,b,d}
+    First(E) = {c,e,b}
     First(Aa) = {c,e}
-    First(Bb) = {b,d}
+    First(Bb) = {b}
     First(cA) = {c}
     First(eB) = {e}
     First(Aa)∩First(Bb) = ∅
@@ -567,7 +575,7 @@ pre[class*="language-"] {
             ParseA();
             MatchToken(a);
             break;
-        case b,d:
+        case b:
             ParseB();
             MatchToken(b);
             break;
@@ -609,7 +617,7 @@ void ParseB()
     }
 }</code></pre></div>
 
-<h4 id="toc_9">(2)</h4>
+<h4 id="toc_10">(2)</h4>
 
 <div><pre><code class="language-none">    S -&gt; AB
     A -&gt; aA | ε
@@ -679,9 +687,9 @@ void ParseB()
 }
 </code></pre></div>
 
-<h3 id="toc_10">5.验证如下文法是LL(1)文法。若是，则请构造文法的LL(1)分析表</h3>
+<h3 id="toc_11">5.验证如下文法是LL(1)文法。若是，则请构造文法的LL(1)分析表</h3>
 
-<h4 id="toc_11">(1)</h4>
+<h4 id="toc_12">(1)</h4>
 
 <div><pre><code class="language-none">    D -&gt; T L
     T -&gt; int | real
@@ -753,7 +761,7 @@ void ParseB()
 </tbody>
 </table>
 
-<h4 id="toc_12">(2)</h4>
+<h4 id="toc_13">(2)</h4>
 
 <div><pre><code class="language-none">    E  -&gt; T E&#39;
     E&#39; -&gt; + E | ε
@@ -775,8 +783,8 @@ void ParseB()
     First(T)∩First(ε) = ∅
     First(*F)∩First(ε) = ∅
     First((E))∩First(a) = ∅
-    First((E))∩First(ε) = ∅
-    First(a)∩First(ε) = ∅
+    First((E))∩First(&amp;) = ∅
+    First(a)∩First(&amp;) = ∅
     
     Follow(E) = {#,)}
     Follow(E&#39;) = {#,)}
@@ -882,9 +890,9 @@ void ParseB()
 </tbody>
 </table>
 
-<h3 id="toc_13">6.消除如下文法的左递归</h3>
+<h3 id="toc_14">6.消除如下文法的左递归</h3>
 
-<h4 id="toc_14">(1)</h4>
+<h4 id="toc_15">(1)</h4>
 
 <div><pre><code class="language-none">    A -&gt; Ba | Aa | c
     B -&gt; Bb | Ab | d</code></pre></div>
@@ -921,7 +929,7 @@ void ParseB()
     B -&gt; cA&#39;bB&#39; | dB&#39;
     B&#39; -&gt; aA&#39;bB&#39; | bB&#39; | ε</code></pre></div>
 
-<h4 id="toc_15">(2)</h4>
+<h4 id="toc_16">(2)</h4>
 
 <div><pre><code class="language-none">    A -&gt; Bx | Cz | w
     B -&gt; Ab | Bc
@@ -937,7 +945,7 @@ void ParseB()
     即B -&gt; Bxb | Bc | Czb | wb
     消除直接左递归
     B -&gt; CzbB&#39; | wbB&#39;
-    B&#39; -&gt; xbB&#39; | cB&#39;</code></pre></div>
+    B&#39; -&gt; xbB&#39; | cB&#39; | ε</code></pre></div>
 
 <p>对C：
 消除左递归:</p>
@@ -950,15 +958,15 @@ void ParseB()
     即C -&gt; CzbB&#39;xx | CzbB&#39;y | Czx | Cp | wbB&#39;xx | wbB&#39;y | wx
     消除直接左递归
     C -&gt; wbB&#39;xxC&#39; | wbB&#39;yC&#39; | wxC&#39;
-    C&#39; -&gt; zbB&#39;xxC&#39; | zbB&#39;yC&#39; | zxC&#39; | pC&#39;</code></pre></div>
+    C&#39; -&gt; zbB&#39;xxC&#39; | zbB&#39;yC&#39; | zxC&#39; | pC&#39; | ε</code></pre></div>
 
 <p>综上所述，消除左递归后文法为</p>
 
 <div><pre><code class="language-none">    A -&gt; Bx | Cz | w
     B -&gt; CzbB&#39; | wbB&#39;
-    B&#39; -&gt; xbB&#39; | cB&#39;
+    B&#39; -&gt; xbB&#39; | cB&#39; | ε
     C -&gt; wbB&#39;xxC&#39; | wbB&#39;yC&#39; | wxC&#39;
-    C&#39; -&gt; zbB&#39;xxC&#39; | zbB&#39;yC&#39; | zxC&#39; | pC&#39;</code></pre></div>
+    C&#39; -&gt; zbB&#39;xxC&#39; | zbB&#39;yC&#39; | zxC&#39; | pC&#39; | ε</code></pre></div>
 
 
 
